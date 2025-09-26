@@ -15,6 +15,7 @@
       --accent:#d7a7a3; /* pastel red-ish for highlights */
       --muted:#666666;
       --maxw:720px;
+      --btn-height:52px;
     }
 
     html,body{height:100%;}
@@ -30,14 +31,18 @@
 
     /* container to mimic mobile size but responsive */
     .phone{
-      width:100%;max-width:var(--maxw);height:calc(100vh - 40px);background:var(--bg);overflow:hidden;position:relative;border:0;
+      width:100%;max-width:var(--maxw);height:calc(100vh - 40px);background:var(--bg);overflow:auto;position:relative;border:0;
+      box-shadow: 0 1px 0 rgba(0,0,0,0.03);
     }
 
-    main{height:100%;overflow:hidden;position:relative}
+    main{min-height:100%;position:relative}
+    /* now sections are in normal flow (not absolutely stacked) so content can scroll naturally */
     section{
-      position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding:28px;transition:transform .6s ease,opacity .5s;backface-visibility:hidden
+      display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding:28px 20px 120px;transition:opacity .35s ease,transform .45s ease;
+      backface-visibility:hidden;box-sizing:border-box;
     }
-    section.hidden{opacity:0;pointer-events:none;transform:translateY(14px);}
+    /* when hidden, remove from flow to avoid layout issues on mobile */
+    section.hidden{display:none;opacity:0;transform:translateY(8px);pointer-events:none;}
 
     /* Letter / medieval style (cursive for the letter text only) */
     .letter{
@@ -46,9 +51,23 @@
 
     .page-title{font-family:'Great Vibes',cursive;font-size:28px;margin:8px 0 20px 0;color:var(--text);text-align:center}
 
-    /* Bottom navigation buttons (flat, no radius) */
+    /* Bottom navigation buttons (flat, no radius)
+       moved slightly up (bottom smaller) and made responsive */
     .bottom-nav{
-      position:absolute;left:0;right:0;bottom:18px;margin:auto;height:46px;max-width:420px;display:flex;align-items:center;justify-content:center;background:#000;color:#fff;border:none;font-weight:700;cursor:pointer;font-family:'Poppins';
+      position:fixed; /* make it fixed so it's always visible and tappable on mobile */
+      left:50%;transform:translateX(-50%);
+      bottom:14px;
+      width:calc(100% - 48px);
+      max-width:420px;
+      height:var(--btn-height);
+      display:flex;align-items:center;justify-content:center;
+      background:#000;color:#fff;border:none;font-weight:700;cursor:pointer;font-family:'Poppins';
+      z-index:9999;
+      box-shadow: 0 6px 18px rgba(0,0,0,0.15);
+    }
+    /* small screens: slightly narrower */
+    @media(max-width:360px){
+      .bottom-nav{width:calc(100% - 32px);bottom:12px}
     }
 
     /* Album area */
@@ -59,16 +78,26 @@
     /* vinyl simplified (minimal) */
     .vinyl{position:absolute;width:320px;height:320px;border-radius:50%;left:calc(50% - 160px);top:22%;z-index:1;opacity:0.6;display:none}
     @media(min-width:420px){.vinyl{display:block}}
-    .vinyl .disc{position:absolute;inset:0;background:radial-gradient(circle at 40% 30%, #111 0%, #000 40%);border-radius:50%;transform-origin:center center;animation:spin 9s linear infinite}
-    @keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
 
     .song-title{font-size:18px;font-weight:600}
     .lyrics{font-family:'Poppins';font-size:16px;text-align:center;margin-top:6px;line-height:1.5;color:var(--muted)}
     .lyrics b{color:var(--accent);font-weight:700}
 
-    /* Collage (third page) inspired by the image: overlapping photos, no rounded corners */
-    .collage{position:relative;width:100%;max-width:680px;height:360px;margin-top:18px}
-    .collage img{position:absolute;width:auto;height:60%;object-fit:cover;box-shadow:none;border:0}
+    /* Collage (third page) inspired by the image: overlapping photos on wide screens,
+       but switch to grid on small screens so nothing fica em cima */
+    .collage{
+      position:relative;
+      width:100%;
+      max-width:680px;
+      height:360px;
+      margin-top:18px;
+      box-sizing:border-box;
+    }
+    .collage img{
+      position:absolute;width:auto;height:60%;object-fit:cover;box-shadow:none;border:0;transition:transform .35s ease;
+      -webkit-user-drag: none;
+    }
+    /* initial overlapping positions (used for desktop/tablet) */
     .c1{left:2%;top:4%;height:66%;transform:rotate(-2deg);z-index:3}
     .c2{left:28%;top:0%;height:72%;transform:rotate(1deg);z-index:4}
     .c3{left:56%;top:6%;height:64%;transform:rotate(-1deg);z-index:2}
@@ -76,7 +105,31 @@
     .c5{left:48%;top:56%;height:44%;transform:rotate(-4deg);z-index:5}
     .c6{left:70%;top:40%;height:34%;transform:rotate(2deg);z-index:6}
 
-    .phrases{margin-top:14px;display:flex;flex-direction:column;gap:8px;text-align:center;font-weight:600}
+    /* On small screens (typical phones) switch collage into a 2-column grid to avoid overlap */
+    @media (max-width:520px){
+      .collage{
+        display:grid;
+        grid-template-columns: repeat(2, 1fr);
+        grid-auto-rows: 140px;
+        gap:8px;
+        height:auto;
+        margin-top:14px;
+      }
+      .collage img{
+        position:relative !important;
+        width:100% !important;
+        height:100% !important;
+        transform:none !important;
+        left:auto !important;
+        top:auto !important;
+        box-shadow: none;
+      }
+
+      /* ensure big photo takes two rows for nicer layout (optional) */
+      .c2{grid-column:1 / span 2; grid-row:1 / span 1; height:180px !important;}
+    }
+
+    .phrases{margin-top:14px;display:flex;flex-direction:column;gap:8px;text-align:center;font-weight:600;padding:0 8px}
 
     /* Gift page */
     .gift-area{display:flex;flex-direction:column;align-items:center;gap:18px;margin-top:18px}
@@ -88,13 +141,16 @@
     .final-text strong{font-weight:800}
 
     /* make all images square/no radius */
-    img{border-radius:0}
+    img{border-radius:0;display:block}
 
     /* small helpers */
     .center{display:flex;align-items:center;justify-content:center}
 
     /* ensure large tappable area */
     button{touch-action:manipulation}
+
+    /* accessibility focus style for buttons */
+    button:focus{outline:3px solid rgba(0,0,0,0.12);outline-offset:2px}
   </style>
 </head>
 <body>
@@ -152,7 +208,7 @@
         <div style="width:100%;max-width:680px">
           <div class="page-title">Seria impossível deixar de falar</div>
 
-          <div class="collage" id="photoGrid">
+          <div class="collage" id="photoGrid" aria-live="polite">
             <!-- Images placed to mimic the collage reference. Add photos in assets/photos/photo1.jpg ... -->
             <img src="assets/photos/photo1.jpg" class="c1" alt="Foto 1">
             <img src="assets/photos/photo2.jpg" class="c2" alt="Foto 2">
@@ -217,10 +273,14 @@
 
     const bgAudio = document.getElementById('bgAudio');
 
+    // show/hide by toggling the "hidden" class (which now uses display:none)
     function show(section){
-      [s1,s2,s3,s4,s5].forEach(s=>s.classList.add('hidden'));
+      [s1,s2,s3,s4,s5].forEach(s=>{
+        s.classList.add('hidden');
+      });
       section.classList.remove('hidden');
-      window.scrollTo({top:0,behavior:'smooth'});
+      // scroll the phone container to top so content starts at top
+      document.querySelector('.phone').scrollTo({top:0,behavior:'smooth'});
     }
 
     continueBtn.addEventListener('click', ()=>{
@@ -235,10 +295,16 @@
     next3.addEventListener('click', ()=> show(s4));
     next4.addEventListener('click', ()=> show(s5));
 
-    // photo reveal for collage: fade-in each image
+    // photo reveal for collage: fade-in each image (keeps working on grid too)
     function animateCollage(){
       const imgs = document.querySelectorAll('.collage img');
-      imgs.forEach((img,i)=>{img.style.opacity=0;img.style.transition='opacity .6s ease '+(i*120)+'ms';setTimeout(()=>img.style.opacity=1,50)});
+      imgs.forEach((img,i)=>{
+        img.style.opacity = 0;
+        img.style.transition = 'opacity .6s ease '+(i*120)+'ms, transform .35s ease';
+        // small pop effect for desktop overlapping layout
+        img.style.transform += ' scale(0.98)';
+        setTimeout(()=>{ img.style.opacity = 1; img.style.transform = img.style.transform.replace(' scale(0.98)',''); },50);
+      });
     }
 
     // observe s3 visibility
@@ -248,34 +314,24 @@
     // gift reveal
     const giftBtn = document.getElementById('giftBtn');
     const giftGif = document.getElementById('giftGif');
-    giftBtn.addEventListener('click', ()=>{giftBtn.style.display='none';giftGif.style.display='block';});
+    giftBtn && giftBtn.addEventListener('click', ()=>{giftBtn.style.display='none';giftGif.style.display='block';});
 
     // initially show s1
     show(s1);
 
+    // optional: if some images are missing, replace with placeholders (keeps layout intact)
+    document.querySelectorAll('.collage img').forEach(img=>{
+      img.addEventListener('error', ()=>{ img.src = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="400" height="400"><rect width="100%" height="100%" fill="%23eee"/><text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" fill="%23888" font-size="20">foto</text></svg>'; });
+    });
+
   </script>
 
   <!--
-    INSTRUÇÕES DE ARQUIVOS (coloque tudo na pasta "assets" no repositório):
-    - assets/cover.jpg      -> capa do álbum (recomenda: 800x800px)
-    - assets/song.mp3       -> áudio da música (forneça você; atenção a direitos autorais)
-    - assets/gift.gif       -> gif que aparece quando clicar em "presente"
-    - assets/photos/photo1.jpg ... photo6.jpg -> fotos pessoais (recomendado 1080x1080)
-
-    Mudanças aplicadas nesta versão:
-    - Tema minimalista branco/preto/com destaque em vermelho pastel.
-    - Removidos cantos arredondados e sombras para um visual plano.
-    - Títulos adicionados nas páginas 1, 2 e 3; texto de aviso removido da página 1.
-    - Texto do trecho da música com destaque em cor mais forte (var --accent).
-    - Todos os botões "próximo" e o botão inicial ficam fixos ao final da tela (bottom-nav).
-    - Página 3 agora usa um colagem (collage) sem bordas, inspirada na imagem que você anexou.
-    - Página 4 (presente) tem título maior e gif revelado após clique.
-
-    Se quiser, eu posso:
-    - gerar um README.md com instruções passo a passo para enviar ao GitHub usando git.
-    - criar uma versão com controle de volume visível e pause/play.
-    - ajustar posições/sizes da colagem para corresponder exatamente às suas fotos (se você subir as fotos, eu atualizo as posições).
+    OBS:
+    - Em telas grandes a colagem mantém a sobreposição; em celulares (<=520px) ela vira um grid 2-colunas para que todas as fotos fiquem visíveis.
+    - Os botões agora são FIXOS (position:fixed) e estão mais para cima (bottom:14px). Isso melhora a usabilidade no celular (botão sempre acessível). Se preferir botão não fixo, eu mudo de volta para posição relativa.
+    - A área do conteúdo tem padding-bottom maior para evitar que o conteúdo fique escondido sob o botão.
+    - Se quiser que numa tela específica (ex.: seu celular) a colagem tenha posições/exatas rotações diferentes, me envie as fotos hospedadas e eu ajusto as posições (`.c1`, `.c2`, ...) exatamente como você quer.
   -->
 </body>
 </html>
-
