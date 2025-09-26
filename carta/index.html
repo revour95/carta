@@ -1,0 +1,310 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Parece que chegou algo pra você</title>
+
+  <!-- Google Fonts: Great Vibes (cursiva) + Poppins (limpa) -->
+  <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+
+  <style>
+    :root{
+      --bg:#0f0b06; /* dark background for mobile romantic look */
+      --card:#fffaf3;
+      --accent:#d7a7a3; /* pastel red-ish for highlights */
+      --muted:#bfb1a6;
+      --glass: rgba(255,255,255,0.06);
+      --radius:18px;
+      --maxw:720px;
+    }
+    html,body{height:100%;}
+    body{
+      margin:0;
+      font-family:'Poppins',system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial;
+      background:linear-gradient(180deg,#0b0810 0%, #2b1f27 100%);
+      color:#fff;
+      -webkit-font-smoothing:antialiased;
+      -moz-osx-font-smoothing:grayscale;
+      display:flex;align-items:center;justify-content:center;padding:20px;
+    }
+
+    /* container to mimic mobile size but responsive */
+    .phone{
+      width:100%;max-width:var(--maxw);height:calc(100vh - 40px);background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0.18));border-radius:30px;overflow:hidden;box-shadow:0 10px 40px rgba(0,0,0,0.6);position:relative;
+    }
+
+    main{height:100%;overflow:hidden;position:relative}
+    section{
+      position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:28px;transition:transform .8s cubic-bezier(.2,.9,.2,1),opacity .6s;backface-visibility:hidden
+    }
+    section.hidden{opacity:0;pointer-events:none;transform:translateY(20px);}
+
+    /* Letter / medieval style */
+    .letter{
+      background:linear-gradient(180deg, rgba(255,251,242,0.9), rgba(255,246,235,0.8));color:#2a1f18;padding:22px;border-radius:16px;box-shadow:0 8px 30px rgba(0,0,0,0.45);max-width:100%;width:100%;
+      font-family:'Great Vibes', cursive; font-size:20px;line-height:1.4;color:#2b1f18; text-align:left;
+    }
+
+    .title-small{font-family:'Great Vibes',cursive;font-size:24px;margin-bottom:10px;color:#f3e9dd}
+
+    .bottom-btn{
+      position:absolute;left:50%;transform:translateX(-50%);bottom:22px;background:linear-gradient(180deg, rgba(255,255,255,0.95), rgba(255,255,255,0.9));color:#2b1f18;padding:12px 22px;border-radius:999px;font-weight:600;box-shadow:0 6px 18px rgba(0,0,0,0.35);cursor:pointer;border:none;font-family:'Poppins';
+    }
+
+    /* second screen - album */
+    .album-wrap{display:flex;flex-direction:column;align-items:center;gap:14px}
+    .album-cover{
+      width:62%;max-width:260px;aspect-ratio:1/1;border-radius:12px;overflow:hidden;position:relative;z-index:3;box-shadow:0 10px 30px rgba(0,0,0,0.6)
+    }
+    .album-cover img{width:100%;height:100%;object-fit:cover;display:block}
+
+    /* vinyl behind the cover (half visible) */
+    .vinyl{
+      position:absolute;width:360px;height:360px;border-radius:50%;left:calc(50% - 180px);top:20%;z-index:1;pointer-events:none;opacity:0.95;display:none;
+    }
+    @media(min-width:420px){.vinyl{display:block}}
+    .vinyl .disc{position:absolute;inset:0;background:radial-gradient(circle at 40% 30%, #222 0%, #0a0a0a 40%);border-radius:50%;filter:drop-shadow(0 10px 30px rgba(0,0,0,0.6));transform-origin:center center;animation:spin 8s linear infinite}
+    @keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+
+    .song-title{font-size:20px;font-weight:600}
+    .lyrics{font-family:'Poppins';font-size:15px;text-align:center;margin-top:6px;line-height:1.4;color:var(--muted)}
+    .lyrics b{color:var(--accent);font-weight:700}
+
+    .small-btn{background:var(--glass);border:1px solid rgba(255,255,255,0.06);backdrop-filter: blur(4px);color:#fff;padding:10px 16px;border-radius:999px;font-weight:600;cursor:pointer}
+
+    /* gallery */
+    .grid-photos{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;width:100%;padding:6px}
+    .photo{width:100%;aspect-ratio:1/1;border-radius:12px;overflow:hidden;transform:translateY(20px);opacity:0}
+    .photo img{width:100%;height:100%;object-fit:cover}
+    .photo.show{transform:none;opacity:1;transition:all .8s cubic-bezier(.2,.9,.2,1)}
+    .phrases{margin-top:14px;display:flex;flex-direction:column;gap:8px;text-align:center}
+
+    /* gift page */
+    .gift-area{display:flex;flex-direction:column;align-items:center;gap:16px}
+    .gift-btn{padding:10px 18px;border-radius:12px;border:none;background:linear-gradient(180deg,#fffef8,#fff4ee);color:#2b1f18;font-weight:700;cursor:pointer}
+    .gift-gif{max-width:80%;border-radius:12px;display:none}
+
+    /* final text */
+    .final-text{font-family:'Poppins';font-size:16px;color:#f3e3e1;line-height:1.6;padding:6px;text-align:left;max-width:680px}
+    .final-text strong{font-weight:800}
+
+    /* small helpers */
+    .center{display:flex;align-items:center;justify-content:center}
+
+    /* accessibility: large tappable areas */
+    button{touch-action:manipulation}
+  </style>
+</head>
+<body>
+  <div class="phone" role="application" aria-label="Site surpresa para sua namorada">
+    <main>
+
+      <!-- SECTION 1: Medieval letter -->
+      <section id="s1">
+        <div style="width:100%;max-width:620px">
+          <div class="letter">
+            <div class="title-small">Parece que chegou algo pra você</div>
+            <p>Minha querida futura esposa, mesmo que porventura o destino tenha nos separado de corpo, você reside em meu coração. Escrevo esta carta para que lembre do tanto que eu te amo...</p>
+            <p style="font-size:14px;color:#7b6a5f;margin-top:8px">(Toque em "continue lendo" abaixo)</p>
+          </div>
+        </div>
+
+        <button class="bottom-btn" id="continueBtn">continue lendo</button>
+      </section>
+
+      <!-- SECTION 2: Album + music -->
+      <section id="s2" class="hidden">
+        <div class="album-wrap center">
+          <div class="vinyl" aria-hidden="true">
+            <div class="disc"></div>
+          </div>
+
+          <div class="album-cover" aria-hidden="false">
+            <!-- Replace assets/cover.jpg with the album cover image -->
+            <img src="assets/cover.jpg" alt="Capa do álbum - I Dont Understand But I Luv U">
+          </div>
+
+          <div style="text-align:center">
+            <div class="song-title">I Don't Understand But I Luv U — SEVENTEEN</div>
+            <div class="lyrics" aria-label="Trecho da música">
+              I don't understand but <b>i love you</b><br>
+              I don't understand but <b>i love you</b><br>
+              I don't understand but <b>i love you</b><br>
+              I don't understand but <b>i love you</b>
+            </div>
+          </div>
+
+          <button class="small-btn" id="next2">próximo</button>
+        </div>
+
+        <!-- audio element (user must provide the file at assets/song.mp3)
+             Note: modern mobile browsers allow playback only after a user gesture — we start playing after the click on 'continue lendo' -->
+        <audio id="bgAudio" src="assets/song.mp3" preload="auto"></audio>
+      </section>
+
+      <!-- SECTION 3: Gallery + phrases -->
+      <section id="s3" class="hidden">
+        <div style="width:100%">
+          <h3 style="font-family:'Great Vibes',cursive;text-align:center;font-size:22px;margin-bottom:8px">Seria impossível deixar de falar de como seus olhos me cativam</h3>
+
+          <div class="grid-photos" id="photoGrid">
+            <!-- Add photos into assets/photos/photo1.jpg ... photo6.jpg -->
+            <div class="photo"><img src="assets/photos/photo1.jpg" alt="Foto nossa 1"></div>
+            <div class="photo"><img src="assets/photos/photo2.jpg" alt="Foto nossa 2"></div>
+            <div class="photo"><img src="assets/photos/photo3.jpg" alt="Foto nossa 3"></div>
+            <div class="photo"><img src="assets/photos/photo4.jpg" alt="Foto nossa 4"></div>
+            <div class="photo"><img src="assets/photos/photo5.jpg" alt="Foto nossa 5"></div>
+            <div class="photo"><img src="assets/photos/photo6.jpg" alt="Foto nossa 6"></div>
+          </div>
+
+          <div class="phrases">
+            <div class="center" style="font-weight:600">É como meus maiores sonhos criando uma forma na realidade</div>
+            <div class="center" style="font-weight:600">Em meus dias não vejo mais sentido em dizer algo que não seja sobre você</div>
+            <div class="center" style="font-weight:600">Seria impossível deixar de falar de como seus olhos me cativam</div>
+          </div>
+
+          <div style="margin-top:14px" class="center"><button class="small-btn" id="next3">próximo</button></div>
+        </div>
+      </section>
+
+      <!-- SECTION 4: Present with gif reveal -->
+      <section id="s4" class="hidden">
+        <div class="gift-area center">
+          <h3 style="font-family:'Great Vibes',cursive">Não poderia deixar você de mãos abanando, tome isso, torne um fragmento da minha memória agora sua</h3>
+
+          <button class="gift-btn" id="giftBtn">presente</button>
+
+          <!-- gif should be provided as assets/gift.gif -->
+          <img src="assets/gift.gif" class="gift-gif" id="giftGif" alt="Gif do presente">
+
+          <div style="margin-top:10px"><button class="small-btn" id="next4">próximo</button></div>
+        </div>
+      </section>
+
+      <!-- SECTION 5: Final message -->
+      <section id="s5" class="hidden">
+        <div style="padding:14px">
+          <div class="final-text">
+            <p>Minha querida futura esposa,<br>
+            Sinto muito por não estar ao seu lado fisicamente, sonho todos os dias no dia do nosso encontro. Pode ser que eu não seja o melhor pretendente de todos os príncipes mas posso escrever no meu túmulo que fui o mais apaixonado. Mal posso esperar pelo momento em que toda angústia irá passar e toda a saudade se for, e nesse momento eu finalmente direi da forma correta... "quer casar comigo?"</p>
+
+            <p style="margin-top:12px"> <strong>eu</strong> amo você</p>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <script>
+    // Navigation helpers
+    const s1 = document.getElementById('s1');
+    const s2 = document.getElementById('s2');
+    const s3 = document.getElementById('s3');
+    const s4 = document.getElementById('s4');
+    const s5 = document.getElementById('s5');
+
+    const continueBtn = document.getElementById('continueBtn');
+    const next2 = document.getElementById('next2');
+    const next3 = document.getElementById('next3');
+    const next4 = document.getElementById('next4');
+
+    const bgAudio = document.getElementById('bgAudio');
+
+    function show(section){
+      [s1,s2,s3,s4,s5].forEach(s=>s.classList.add('hidden'));
+      section.classList.remove('hidden');
+      // scroll to top for mobile
+      window.scrollTo({top:0,behavior:'smooth'});
+    }
+
+    continueBtn.addEventListener('click', ()=>{
+      show(s2);
+      // start music after user gesture (click) — must provide assets/song.mp3
+      if(bgAudio && bgAudio.paused){
+        bgAudio.volume = 0.9;
+        bgAudio.play().catch(err=>{
+          // some browsers require a user gesture; we already had one but keep a fallback
+          console.log('playback prevented or fail', err);
+        });
+      }
+    });
+
+    next2.addEventListener('click', ()=> show(s3));
+    next3.addEventListener('click', ()=>{
+      // reveal photos with simple stagger animation
+      show(s4); // temporarily show s4 to keep order in case of slow images
+      // but we actually want to go to gallery first — changed per flow: show s3 then animate then next will go to s4
+    });
+
+    // Note: we want next3 to show s4 after animating photos — modify so next3 first shows s3 then animates
+    // To implement: on entering s3, run photo reveal
+
+    // Observe when s3 is shown to animate photos
+    const observer = new MutationObserver(()=>{
+      if(!s3.classList.contains('hidden')) animatePhotos();
+    });
+    observer.observe(s3,{attributes:true,attributeFilter:['class']});
+
+    function animatePhotos(){
+      const photos = document.querySelectorAll('#photoGrid .photo');
+      photos.forEach((p,i)=>{
+        setTimeout(()=>p.classList.add('show'), 200 * i);
+      });
+    }
+
+    // Correct next3 behavior: move from s3 to s4
+    next3.addEventListener('click', ()=> show(s4));
+
+    // gift button reveals gif and hides itself
+    const giftBtn = document.getElementById('giftBtn');
+    const giftGif = document.getElementById('giftGif');
+    giftBtn.addEventListener('click', ()=>{
+      giftBtn.style.display='none';
+      giftGif.style.display='block';
+    });
+
+    next4.addEventListener('click', ()=> show(s5));
+
+    // Initially show only s1
+    show(s1);
+
+    // small UX touch: pause audio when leaving s2
+    const allButtons = document.querySelectorAll('button');
+    allButtons.forEach(b=>b.addEventListener('click', ()=>{
+      // if leaving s2
+      if(document.body.contains(bgAudio)){
+        // keep playing until user goes to final? keep simple: keep playing while in s2
+      }
+    }));
+
+    // Prevent overscroll on mobile inside container
+    document.querySelector('.phone').addEventListener('touchmove', function(e){e.stopPropagation();}, {passive:true});
+
+  </script>
+
+  <!--
+    INSTRUÇÕES DE ARQUIVOS (coloque tudo na pasta "assets" no repositório):
+    - assets/cover.jpg      -> capa do álbum (recomenda: 800x800px)
+    - assets/disc.png       -> (opcional) imagem do vinil circular (se quiser usar em vez do CSS disc)
+    - assets/song.mp3       -> áudio da música (consultar direitos autorais; o navegador irá reproduzir após clique)
+    - assets/gift.gif       -> gif que aparece quando clicar em "presente"
+    - assets/photos/photo1.jpg ... photo6.jpg -> fotos pessoais (recomendado 800x800 ou 1080x1080)
+
+    NOME DO ARQUIVO PRINCIPAL: index.html
+
+    COMO PUBLICAR NO GITHUB PAGES:
+      1) Crie um repositório no GitHub (por exemplo: nome "presente-namorada").
+      2) Faça upload do index.html e da pasta assets/ com as imagens e o arquivo song.mp3.
+      3) Em Settings > Pages, habilite GitHub Pages apontando para a branch principal (root). Após alguns minutos a página estará disponível em https://<seu-usuario>.github.io/<repositorio>/
+
+    OBSERVAÇÕES IMPORTANTES:
+      - Arquivo de áudio: por direitos autorais, eu não posso fornecer a música original. Você precisa colocar aqui o arquivo "assets/song.mp3" com a música autorizada (ou uma versão instrumental/cover que você tenha direito de usar).
+      - Autoplay em mobile: o som será iniciado a partir do clique do usuário (ok). Alguns navegadores limitam volume automático, por isso pedimos o clique em "continue lendo".
+      - Fontes: usamos Google Fonts; o index funciona offline se preferir baixar os arquivos das fontes e servir localmente.
+
+    Quer que eu gere uma versão otimizada (minificada) ou uma versão com mais efeitos (parchment background, tipografia adicional, controle de volume, player visível)?
+  -->
+</body>
+</html>
